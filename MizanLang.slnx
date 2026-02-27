@@ -3,5 +3,6 @@
     <File Path="ReadMe.md" />
   </Folder>
   <Project Path="MizanLang.Cli\MizanLang.Cli.csproj" />
+  <Project Path="MizanLang.Tests/MizanLang.Tests.csproj" />
   <Project Path="MizanLang\MizanLang.csproj" />
 </Solution>

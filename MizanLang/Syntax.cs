@@ -1,4 +1,5 @@
-namespace MizanLang.AST;
+// ReSharper disable once CheckNamespace
+namespace MizanLang.Syntax;
 
 using System.Collections.Immutable;
 using Sawmill;
@@ -21,6 +22,8 @@ public enum BinaryOperator
     Add, Subtract, Multiply, Divide, Modulo,
     GreaterThan, LessThan, Equal, NotEqual, GreaterThanOrEqual, LessThanOrEqual
 }
+
+public enum UnaryOperator { Not }
 
 public abstract class Expression: IRewritable<Expression>
 {
@@ -45,6 +48,22 @@ public class BinaryExpression(Expression left, BinaryOperator op, Expression rig
 
     public override Expression SetChildren(ReadOnlySpan<Expression> newChildren)
         => new BinaryExpression(newChildren[0], Operator, newChildren[1]);
+}
+
+public class UnaryExpression : Expression
+{
+    public UnaryOperator Operator { get; }
+    public Expression Operand { get; }
+
+    public UnaryExpression(UnaryOperator op, Expression operand)
+    {
+        Operator = op;
+        Operand = operand;
+    }
+
+    public override int CountChildren() => 1;
+    public override void GetChildren(Span<Expression> childrenReceiver) => childrenReceiver[0] = Operand;
+    public override Expression SetChildren(ReadOnlySpan<Expression> newChildren) => new UnaryExpression(Operator, newChildren[0]);
 }
 
 public class InListExpression(Expression target, ImmutableArray<Expression> values) : Expression

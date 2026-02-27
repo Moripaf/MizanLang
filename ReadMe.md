@@ -1,6 +1,6 @@
-# Mizan DSL Specification V1.0
+# Mizan DSL
 
-## 1. Summary
+## Summary
 
 **Mizan** is a declarative, domain-specific language designed for data quality validation. It allows non-technical Persian-speaking users to define conditional logic without knowledge of SQL or C#.
 
@@ -11,7 +11,7 @@
 
 ---
 
-## 2. Language Grammar (EBNF Structure)
+## Language Grammar (EBNF Structure)
 
 For Version 1.0, we prioritize explicit delimiters for identifiers to avoid ambiguity with whitespace and keywords.
 
@@ -55,7 +55,7 @@ CompareOp       ::= "بزرگتر از" | "کوچکتر از" | "برابر با
 
 ---
 
-## 3. Lexicon / Keyword Map
+## Lexicon / Keyword Map
 
 | Concept | Farsi Keyword(s) | Logical / Operator |
 | :--- | :--- | :--- |
@@ -76,7 +76,7 @@ CompareOp       ::= "بزرگتر از" | "کوچکتر از" | "برابر با
 
 ---
 
-## 5. Backend Interface
+## Backend Interface
 
 The system uses the **Visitor Pattern** to separate parsing from code generation.
 
@@ -99,7 +99,10 @@ public class DotNetExpressionBuilder : IMizanVisitor<System.Linq.Expressions.Exp
 
 ---
 
-## 6. Examples
+## Examples
+
+the examples here show the code generated as sql expressions that can be put in a where clause <br/>
+but backends can be made to generate source code from the ast (available in `./MizanLang/Syntax.cs`) for any other language
 
 ### Example 1: Simple Comparison
 
@@ -107,14 +110,6 @@ public class DotNetExpressionBuilder : IMizanVisitor<System.Linq.Expressions.Exp
 
 * **Farsi Input:**
     `اگر [سن] بزرگتر از 18 باشد باید [وضعیت] برابر با 'بزرگسال' باشد`
-* **AST (Pseudocode):**
-
-    ```text
-    ValidationRule:
-      Filter: Binary(Id([سن]), GreaterThan, Lit(18))
-      Req:    Binary(Id([وضعیت]), Equal, Lit('بزرگسال'))
-    ```
-
 * **SQL Output (Boolean Logic):**
 
     ```sql
@@ -128,14 +123,6 @@ public class DotNetExpressionBuilder : IMizanVisitor<System.Linq.Expressions.Exp
 
 * **Farsi Input:**
     `اگر [شهر] در لیست ('تهران', 'شیراز') است باید [کد_منطقه] کوچکتر از 5 باشد`
-* **AST (Pseudocode):**
-
-    ```text
-    ValidationRule:
-      Filter: InSet(Id([شهر]), [Lit('تهران'), Lit('شیراز')])
-      Req:    Binary(Id([کد_منطقه]), LessThan, Lit(5))
-    ```
-
 * **SQL Output:**
 
     ```sql
@@ -148,21 +135,6 @@ public class DotNetExpressionBuilder : IMizanVisitor<System.Linq.Expressions.Exp
 
 * **Farsi Input:**
     `اگر [مالی.گردش] بزرگتر از 1000 و [پرسنلی.نوع] مخالف 'مدیر' باشد باید [تاییدیه] برابر 1 یا [توضیحات] مخالف '' باشد`
-* **AST (Pseudocode):**
-
-    ```text
-    ValidationRule:
-      Filter: Binary(
-          Binary(Id([مالی.گردش]), GreaterThan, Lit(1000)),
-          And,
-          Binary(Id([پرسنلی.نوع]), NotEqual, Lit('مدیر'))
-      )
-      Req: Binary(
-          Binary(Id([تاییدیه]), Equal, Lit(1)),
-          Or,
-          Binary(Id([توضیحات]), NotEqual, Lit(''))
-      )
-    ```
 
 * **SQL Output:**
 
@@ -171,3 +143,7 @@ public class DotNetExpressionBuilder : IMizanVisitor<System.Linq.Expressions.Exp
     OR 
     (([Approved] = 1) OR ([Description] <> ''))
     ```
+  
+## Contributions
+
+all contributions. especially adding backends for languages are welcome
