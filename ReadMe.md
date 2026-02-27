@@ -74,31 +74,6 @@ CompareOp       ::= "بزرگتر از" | "کوچکتر از" | "برابر با
 | | `بین` ... `و` ... | `Between` (Range) |
 | **Noise** (Ignored) | `است`, `باشد`, `که`, `مقدار` | `NoOp` |
 
----
-
-## Backend Interface
-
-The system uses the **Visitor Pattern** to separate parsing from code generation.
-
-```csharp
-public interface IMizanVisitor<T>
-{
-    T Visit(ValidationRule rule);
-    T Visit(BinaryExpression binary);
-    T Visit(UnaryExpression unary);
-    T Visit(InSetExpression inSet);
-    T Visit(BetweenExpression between);
-    T Visit(IdentifierExpression identifier);
-    T Visit(LiteralExpression literal);
-}
-
-// Example Implementation Signatures
-public class SqlGenerator : IMizanVisitor<string> { ... }
-public class DotNetExpressionBuilder : IMizanVisitor<System.Linq.Expressions.Expression> { ... }
-```
-
----
-
 ## Examples
 
 the examples here show the code generated as sql expressions that can be put in a where clause <br/>
@@ -109,7 +84,19 @@ but backends can be made to generate source code from the ast (available in `./M
 **Context:** Salary validation based on age.
 
 * **Farsi Input:**
-    `اگر [سن] بزرگتر از 18 باشد باید [وضعیت] برابر با 'بزرگسال' باشد`
+    `اگر [سن] بزرگتر از 18 باشد باید [وضعیت] برابر با "بزرگسال" باشد`
+* **Ast Representation**
+    ```text
+    Rule
+    ├── Filter (اگر)
+    │   └── BinaryExpression (GreaterThan)
+    │       ├── Identifier: [سن]
+    │       └── Literal: 18
+    └── Requirement (باید)
+        └── BinaryExpression (Equal)
+            ├── Identifier: [وضعیت]
+            └── Literal: "بزرگسال"
+    ```
 * **SQL Output (Boolean Logic):**
 
     ```sql
@@ -122,7 +109,21 @@ but backends can be made to generate source code from the ast (available in `./M
 **Context:** Specific cities must have specific codes.
 
 * **Farsi Input:**
-    `اگر [شهر] در لیست ('تهران', 'شیراز') است باید [کد_منطقه] کوچکتر از 5 باشد`
+    `اگر [شهر] در لیست ("تهران", "شیراز") است باید [کد_منطقه] کوچکتر از 5 باشد`
+* **Ast Representation**
+    ```text
+    Rule
+    ├── Filter (اگر)
+    │   └── InListExpression
+    │       ├── Identifier: [شهر]
+    │       ├── Literal: "تهران"
+    │       └── Literal: "شیراز"
+    └── Requirement (باید)
+        └── BinaryExpression (LessThan)
+            ├── Identifier: [کد_منطقه]
+            └── Literal: 5
+    ```
+
 * **SQL Output:**
 
     ```sql
@@ -134,8 +135,30 @@ but backends can be made to generate source code from the ast (available in `./M
 **Context:** Financial verification involving nested logic.
 
 * **Farsi Input:**
-    `اگر [مالی.گردش] بزرگتر از 1000 و [پرسنلی.نوع] مخالف 'مدیر' باشد باید [تاییدیه] برابر 1 یا [توضیحات] مخالف '' باشد`
+    `اگر [مالی.گردش] بزرگتر از 1000 و [پرسنلی.نوع] مخالف "مدیر" باشد باید [تاییدیه] برابر 1 یا [توضیحات] مخالف "" باشد`
 
+* **Ast Representation
+  
+    ```text
+    Rule
+    ├── Filter (اگر)
+    │   └── BinaryExpression (And)
+    │       ├── BinaryExpression (GreaterThan)
+    │       │   ├── Identifier: [مالی.گردش]
+    │       │   └── Literal: 1000
+    │       └── BinaryExpression (NotEqual)
+    │           ├── Identifier: [پرسنلی.نوع]
+    │           └── Literal: "مدیر"
+    └── Requirement (باید)
+        └── BinaryExpression (Or)
+            ├── BinaryExpression (Equal)
+            │   ├── Identifier: [تاییدیه]
+            │   └── Literal: 1
+            └── BinaryExpression (NotEqual)
+                ├── Identifier: [توضیحات]
+                └── Literal: ""
+    ```
+  
 * **SQL Output:**
 
     ```sql

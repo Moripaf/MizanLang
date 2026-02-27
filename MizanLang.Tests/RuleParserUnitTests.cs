@@ -1,10 +1,9 @@
 ﻿using MizanLang.Syntax;
 
 namespace MizanLang.Tests;
-using System.Linq;
 using Xunit;
 
-public class RuleParserTests
+public class RuleParserUnitTests
 {
     [Fact]
     public void Parse_BasicRule_ReturnsCorrectTree()

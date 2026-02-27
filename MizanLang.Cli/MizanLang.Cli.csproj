@@ -8,4 +8,8 @@
         <RootNamespace>MizanLang.Cli</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\MizanLang\MizanLang.csproj" />
+    </ItemGroup>
+
 </Project>
