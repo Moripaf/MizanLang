@@ -14,7 +14,7 @@ public static class RuleParser
     private static readonly Parser<char, string> NoiseWords =
         Try(String("است")).Or(Try(String("باشد"))).Or(Try(String("که"))).Or(Try(String("مقدار")));
 
-// Skip whitespaces OR noise words
+    // Skip whitespaces OR noise words
     private static readonly Parser<char, Unit> SkipJunk =
         Whitespace.IgnoreResult().Or(NoiseWords.IgnoreResult()).Many().IgnoreResult();
 
@@ -26,7 +26,8 @@ public static class RuleParser
     {
         var rest = Map((o, r) => new { Op = o, Right = r }, op, operand).Many();
         return Map(
-            (first, tail) => tail.Aggregate(first, (acc, x) => new BinaryExpression(acc, x.Op, x.Right)),
+            (first, tail) => tail.Aggregate(first, (acc, x)
+                => new BinaryExpression(acc, x.Op, x.Right)),
             operand,
             rest
         );
@@ -86,9 +87,12 @@ public static class RuleParser
 
     // Matches the right-hand side of a comparison, an IN clause, or a BETWEEN clause
     private static readonly Parser<char, Func<Expression, Expression>> ComparisonTail =
-        CompareOp.Then(Additive, (op, right) => (Func<Expression, Expression>)(left => new BinaryExpression(left, op, right)))
-        .Or(Tok("در").Then(Tok("لیست")).Then(Tok("(")).Then(ValueList).Before(Tok(")")).Select(list => (Func<Expression, Expression>)(left => new InListExpression(left, list))))
-        .Or(Tok("بین").Then(Literal).Before(Tok("و")).Then(Literal, (lower, upper) => (Func<Expression, Expression>)(left => new BetweenExpression(left, lower, upper))));
+        CompareOp.Then(Additive, (op, right) =>
+                (Func<Expression, Expression>)(left => new BinaryExpression(left, op, right)))
+        .Or(Tok("در").Then(Tok("لیست")).Then(Tok("(")).Then(ValueList).Before(Tok(")"))
+            .Select(list => (Func<Expression, Expression>)(left => new InListExpression(left, list))))
+        .Or(Tok("بین").Then(Literal).Before(Tok("و")).Then(Literal, (lower, upper)
+            => (Func<Expression, Expression>)(left => new BetweenExpression(left, lower, upper))));
 
     private static readonly Parser<char, Expression> Comparison = Map(
         (left, tail) => tail.HasValue ? tail.Value(left) : left,

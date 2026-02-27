@@ -2,7 +2,7 @@
 
 ## Summary
 
-**Mizan** is a declarative, domain-specific language designed for data quality validation. It allows non-technical Persian-speaking users to define conditional logic without knowledge of SQL or C#.
+**Mizan** is a declarative, domain-specific language designed for data quality validation. It allows non-technical Persian-speaking users to define conditional logic without knowledge of Any Particular Programming Language.
 
 **Core Logic:** Implication (`P -> Q`).
 
@@ -26,7 +26,8 @@ RequirementClause ::= "باید" Expression
 /* Expressions */
 Expression      ::= OrTerm
 OrTerm          ::= AndTerm { "یا" AndTerm }
-AndTerm         ::= Comparison { "و" Comparison }
+AndTerm         ::= NotTerm { "و" NotTerm }
+NotTerm         ::= Comparison ["نیست" | "نمیباشد"]
 
 /* Comparisons */
 Comparison      ::= Additive [ CompareOp Additive ]
@@ -167,6 +168,13 @@ but backends can be made to generate source code from the ast (available in `./M
     (([Approved] = 1) OR ([Description] <> ''))
     ```
   
+## The Parser
+
+The parser is developed using parser composition technique and [Pidgin](https://github.com/benjamin-hodgson/Pidgin) Library<br/>
+it currently Only takes in the code for one Rule and returns the `Rule` Object representing the said rule. or throw a parsing exception specifying where the error occured (as best as a simple parser can)
+
+## The Cli
+the cli can read a rule from a file or from stdin (can be piped into) and the prints the AST tree structure like the examples above
 ## Contributions
 
-all contributions. especially adding backends for languages are welcome
+all contributions. especially adding backends for languages are welcome. please feel free to open issues to report problems or ask for features. I will respond as best as I can
