@@ -33,15 +33,9 @@ class Program
         else
         {
             // Read from standard input (stdin)
-            if (Console.IsInputRedirected)
-            {
-                input = Console.In.ReadToEnd();
-            }
-            else
-            {
+            if (!Console.IsInputRedirected)
                 Console.WriteLine("Enter your rule (Press Ctrl+Z on Windows or Ctrl+D on Unix to execute):");
-                input = Console.In.ReadToEnd();
-            }
+            input = Console.In.ReadToEnd();
         }
 
         if (string.IsNullOrWhiteSpace(input))
@@ -55,6 +49,9 @@ class Program
             // Parse the input
             Rule parsedRule = RuleParser.Parse(input);
 
+            // Print the parsers interpretation of the rule
+            Console.WriteLine("\n--- the parsers interpretation of the rule ---");
+            Console.WriteLine(parsedRule);
             // Print the abstract syntax tree
             Console.WriteLine("\n--- Parsed Abstract Syntax Tree ---");
             AstPrinter.Print(parsedRule);

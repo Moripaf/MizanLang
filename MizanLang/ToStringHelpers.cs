@@ -9,7 +9,13 @@ public static class ToStringHelpers
         {
             BinaryOperator.Or => "یا",
             BinaryOperator.And => "و",
-            _ => ""
+            BinaryOperator.Equal => "=",
+            BinaryOperator.NotEqual => "!=",
+            BinaryOperator.LessThan => "<",
+            BinaryOperator.LessThanOrEqual => "<=",
+            BinaryOperator.GreaterThan => ">",
+            BinaryOperator.GreaterThanOrEqual => ">=",
+            _ => "عملگر"
         };
 
     public static string ToDecompiledString(this UnaryOperator unaryOperator)

@@ -51,24 +51,15 @@ public static class AstPrinter
                 break;
 
             case IdentifierExpression id:
-                Console.WriteLine($"Identifier: [{id.Parts}]");
+                Console.WriteLine($"Identifier: {id}");
                 break;
 
             case LiteralExpression lit:
                 string valStr = lit.Value is string s ? $"\"{s}\"" : (lit.Value?.ToString() ?? "null");
                 Console.WriteLine($"Literal: {valStr}");
                 break;
-            case LiteralExpression<string> lit:
-                Console.WriteLine($"Literal: \"{lit.Value}\"");
-                break;
-            case LiteralExpression<double> lit:
-                Console.WriteLine($"Literal: {lit.Value}");
-                break;
-            case LiteralExpression<bool> lit:
-                Console.WriteLine($"Literal: {lit.Value}");
-                break;
             default:
-                Console.WriteLine(expr?.GetType().Name ?? "Unknown");
+                Console.WriteLine($"Literal: {expr}");
                 break;
         }
     }

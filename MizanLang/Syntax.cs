@@ -9,7 +9,7 @@ public class Rule(Expression filter, Expression requirement)
     public Expression Filter { get; } = filter;
     public Expression Requirement { get; } = requirement;
 
-    public override string ToString() => $"{Filter} باید {Requirement}اگر ";
+    public override string ToString() => $"اگر {Filter} باید {Requirement}";
 }
 
 public enum BinaryOperator
@@ -125,7 +125,13 @@ public class LiteralExpression<T>(T value) : Expression
     public override int CountChildren() => 0;
     public override void GetChildren(Span<Expression> childrenReceiver) { }
     public override Expression SetChildren(ReadOnlySpan<Expression> newChildren) => this;
-    public override string ToString() => Value?.ToString() ?? string.Empty;
+
+    public override string ToString() => Value switch
+    {
+        string v => $"\"{v}\"",
+        null => string.Empty,
+        _ => Value.ToString() ?? string.Empty
+    };
 }
 public class LiteralExpression(object value) : Expression
 {
