@@ -15,12 +15,12 @@ public class RuleParserUnitTests
 
         var filter = Assert.IsType<BinaryExpression>(rule.Filter);
         Assert.Equal(BinaryOperator.GreaterThan, filter.Operator);
-        Assert.Equal("Age", ((IdentifierExpression)filter.Left).Name);
-        Assert.Equal(18.0, ((LiteralExpression)filter.Right).Value);
+        Assert.Equal("Age", ((IdentifierExpression)filter.Left).Parts.Last());
+        Assert.Equal(18.0, ((LiteralExpression<double>)filter.Right).Value);
 
         var req = Assert.IsType<BinaryExpression>(rule.Requirement);
         Assert.Equal(BinaryOperator.Equal, req.Operator);
-        Assert.Equal("Adult", ((LiteralExpression)req.Right).Value);
+        Assert.Equal("Adult", ((LiteralExpression<string>)req.Right).Value);
     }
 
     [Fact]
@@ -60,13 +60,13 @@ public class RuleParserUnitTests
         var rule = RuleParser.Parse(code);
 
         var inList = Assert.IsType<InListExpression>(rule.Filter);
-        Assert.Equal("Role", ((IdentifierExpression)inList.Target).Name);
+        Assert.Equal("Role", ((IdentifierExpression)inList.Target).Parts.Last());
         Assert.Equal(2, inList.Values.Length);
 
         var between = Assert.IsType<BetweenExpression>(rule.Requirement);
-        Assert.Equal("Age", ((IdentifierExpression)between.Target).Name);
-        Assert.Equal(20.0, ((LiteralExpression)between.LowerBound).Value);
-        Assert.Equal(30.0, ((LiteralExpression)between.UpperBound).Value);
+        Assert.Equal("Age", ((IdentifierExpression)between.Target).Parts.Last());
+        Assert.Equal(20.0, ((LiteralExpression<double>)between.LowerBound).Value);
+        Assert.Equal(30.0, ((LiteralExpression<double>)between.UpperBound).Value);
     }
 
     [Fact]
@@ -83,9 +83,9 @@ public class RuleParserUnitTests
     }
 
     [Fact]
-    public void Parse_UnaryNot_WrapsExpression()
+    public void Parse_UnaryNot_WrapsExpression_Multipart_Ids()
     {
-        string code = "اگر [Status] برابر \"Closed\" نیست باید [Action] = true";
+        string code = "اگر [Store.Status] برابر \"Closed\" نیست باید [Action] = true";
         var rule = RuleParser.Parse(code);
 
         var notExpr = Assert.IsType<UnaryExpression>(rule.Filter);
@@ -93,6 +93,7 @@ public class RuleParserUnitTests
 
         var innerEq = Assert.IsType<BinaryExpression>(notExpr.Operand);
         Assert.Equal(BinaryOperator.Equal, innerEq.Operator);
-        Assert.Equal("Status", ((IdentifierExpression)innerEq.Left).Name);
+        Assert.Equal("Status", ((IdentifierExpression)innerEq.Left).Parts[1]);
+        Assert.Equal("Store", ((IdentifierExpression)innerEq.Left).Parts[0]);
     }
 }

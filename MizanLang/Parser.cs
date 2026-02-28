@@ -35,23 +35,23 @@ public static class RuleParser
 
     // --- Literals ---
     private static readonly Parser<char, Expression> NumberLit =
-        Tok(Real).Select<Expression>(d => new LiteralExpression(d));
+        Tok(Real).Select<Expression>(d => new LiteralExpression<double>(d));
 
     private static readonly Parser<char, Expression> StringLit =
         Tok(Char('"').Then(AnyCharExcept('"').ManyString()).Before(Char('"')))
-        .Select<Expression>(s => new LiteralExpression(s));
+        .Select<Expression>(s => new LiteralExpression<string>(s));
 
     private static readonly Parser<char, Expression> BoolLit =
         Tok(String("true").ThenReturn(true).Or(String("false").ThenReturn(false)))
-        .Select<Expression>(b => new LiteralExpression(b));
+        .Select<Expression>(b => new LiteralExpression<bool>(b));
 
     private static readonly Parser<char, Expression> Literal =
         NumberLit.Or(StringLit).Or(BoolLit);
 
     // --- Identifier ---
     private static readonly Parser<char, Expression> Identifier =
-        Tok(Char('[').Then(AnyCharExcept(']').ManyString()).Before(Char(']')))
-        .Select<Expression>(name => new IdentifierExpression(name));
+        Tok(Char('[').Then(AnyCharExcept(']').ManyString().Before(Char(']'))))
+        .Select<Expression>(parts => new IdentifierExpression(parts));
 
     // Forward declaration to allow recursive parentheses (e.g., (A + B))
     private static readonly Parser<char, Expression> Expr = Rec(() => ExpressionRule);

@@ -4,16 +4,12 @@ namespace MizanLang.Syntax;
 using System.Collections.Immutable;
 using Sawmill;
 
-public class Rule
+public class Rule(Expression filter, Expression requirement)
 {
-    public Expression Filter { get; }
-    public Expression Requirement { get; }
+    public Expression Filter { get; } = filter;
+    public Expression Requirement { get; } = requirement;
 
-    public Rule(Expression filter, Expression requirement)
-    {
-        Filter = filter;
-        Requirement = requirement;
-    }
+    public override string ToString() => $"{Filter} باید {Requirement}اگر ";
 }
 
 public enum BinaryOperator
@@ -48,22 +44,18 @@ public class BinaryExpression(Expression left, BinaryOperator op, Expression rig
 
     public override Expression SetChildren(ReadOnlySpan<Expression> newChildren)
         => new BinaryExpression(newChildren[0], Operator, newChildren[1]);
+    public override string ToString() => $"{Left} {Operator.ToDecompiledString()} {Right}";
 }
 
-public class UnaryExpression : Expression
+public class UnaryExpression(UnaryOperator op, Expression operand) : Expression
 {
-    public UnaryOperator Operator { get; }
-    public Expression Operand { get; }
-
-    public UnaryExpression(UnaryOperator op, Expression operand)
-    {
-        Operator = op;
-        Operand = operand;
-    }
+    public UnaryOperator Operator { get; } = op;
+    public Expression Operand { get; } = operand;
 
     public override int CountChildren() => 1;
     public override void GetChildren(Span<Expression> childrenReceiver) => childrenReceiver[0] = Operand;
     public override Expression SetChildren(ReadOnlySpan<Expression> newChildren) => new UnaryExpression(Operator, newChildren[0]);
+    public override string ToString() => $"{Operand} {Operator.ToDecompiledString()}";
 }
 
 public class InListExpression(Expression target, ImmutableArray<Expression> values) : Expression
@@ -88,6 +80,8 @@ public class InListExpression(Expression target, ImmutableArray<Expression> valu
         var newValues = newChildren.Slice(1).ToArray().ToImmutableArray();
         return new InListExpression(newTarget, newValues);
     }
+
+    public override string ToString() => $"{Target} در لیست ({string.Join(',',Values.ToString())})";
 }
 
 public class BetweenExpression(Expression target, Expression lowerBound, Expression upperBound)
@@ -108,17 +102,31 @@ public class BetweenExpression(Expression target, Expression lowerBound, Express
 
     public override Expression SetChildren(ReadOnlySpan<Expression> newChildren)
         => new BetweenExpression(newChildren[0], newChildren[1], newChildren[2]);
+
+    public override string ToString() => $"{Target} بین {LowerBound} و {UpperBound}";
 }
 
-public class IdentifierExpression(string name) : Expression
+public class IdentifierExpression(List<string> parts) : Expression
 {
-    public string Name { get; } = name;
+    public IdentifierExpression(string parts) : this(parts.Split('.').ToList()) { }
+    public List<string> Parts { get; } = parts;
 
     public override int CountChildren() => 0;
     public override void GetChildren(Span<Expression> childrenReceiver) { }
     public override Expression SetChildren(ReadOnlySpan<Expression> newChildren) => this;
+    public override string ToString() => $"[{string.Join('.', Parts)}]";
 }
 
+public class LiteralExpression<T>(T value) : Expression
+{
+    // Value can hold int, double, string, or bool natively
+    public T Value { get; } = value;
+
+    public override int CountChildren() => 0;
+    public override void GetChildren(Span<Expression> childrenReceiver) { }
+    public override Expression SetChildren(ReadOnlySpan<Expression> newChildren) => this;
+    public override string ToString() => Value?.ToString() ?? string.Empty;
+}
 public class LiteralExpression(object value) : Expression
 {
     // Value can hold int, double, string, or bool natively
@@ -127,4 +135,5 @@ public class LiteralExpression(object value) : Expression
     public override int CountChildren() => 0;
     public override void GetChildren(Span<Expression> childrenReceiver) { }
     public override Expression SetChildren(ReadOnlySpan<Expression> newChildren) => this;
+    public override string ToString() =>  Value?.ToString() ?? string.Empty;
 }

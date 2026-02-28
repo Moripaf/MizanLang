@@ -58,22 +58,22 @@ CompareOp       ::= "بزرگتر از" | "کوچکتر از" | "برابر با
 
 ## Lexicon / Keyword Map
 
-| Concept | Farsi Keyword(s) | Logical / Operator |
-| :--- | :--- | :--- |
-| **Structure** | `اگر` | `IF` (Filter Start) |
-| | `باید` | `THEN` (Assertion Start) |
-| **Logical** | `و` | `AND` |
-| | `یا` | `OR` |
-| | `نیست` / `نمی‌باشد` | `NOT` (Unary) |
-| **Comparison** | `برابر` / `برابر با` / `مساوی` | `Equal` (`==`) |
-| | `مخالف` / `نابرابر` | `NotEqual` (`!=`) |
-| | `بزرگتر از` | `GreaterThan` (`>`) |
-| | `کوچکتر مساوی` | `LessThanOrEqual` (`=<`) |
-| | `بزرگتر مساوی` | `GreaterThanOrEqual` (`>=`) |
-| | `کوچکتر از` | `LessThan` (`<`) |
-| **Sets/Range** | `در لیست` / `شامل` | `In` (Set Inclusion) |
-| | `بین` ... `و` ... | `Between` (Range) |
-| **Noise** (Ignored) | `است`, `باشد`, `که`, `مقدار` | `NoOp` |
+| Concept             | Farsi Keyword(s)               | Logical / Operator          |
+|:--------------------|:-------------------------------|:----------------------------|
+| **Structure**       | `اگر`                          | `IF` (Filter Start)         |
+|                     | `باید`                         | `THEN` (Assertion Start)    |
+| **Logical**         | `و`                            | `AND`                       |
+|                     | `یا`                           | `OR`                        |
+|                     | `نیست` / `نمی‌باشد`            | `NOT` (Unary)               |
+| **Comparison**      | `برابر` / `برابر با` / `مساوی` | `Equal` (`==`)              |
+|                     | `مخالف` / `نابرابر`            | `NotEqual` (`!=`)           |
+|                     | `بزرگتر از`                    | `GreaterThan` (`>`)         |
+|                     | `کوچکتر مساوی`                 | `LessThanOrEqual` (`=<`)    |
+|                     | `بزرگتر مساوی`                 | `GreaterThanOrEqual` (`>=`) |
+|                     | `کوچکتر از`                    | `LessThan` (`<`)            |
+| **Sets/Range**      | `در لیست` / `شامل`             | `In` (Set Inclusion)        |
+|                     | `بین` ... `و` ...              | `Between` (Range)           |
+| **Noise** (Ignored) | `است`, `باشد`, `که`, `مقدار`   | `NoOp`                      |
 
 ## Examples
 
