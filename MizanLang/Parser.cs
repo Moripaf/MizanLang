@@ -1,3 +1,4 @@
+using System.Globalization;
 using MizanLang.Syntax;
 
 namespace MizanLang;
@@ -34,24 +35,36 @@ public static class RuleParser
     }
 
     // --- Literals ---
-    private static readonly Parser<char, Expression> NumberLit =
-        Tok(Real).Select<Expression>(d => new LiteralExpression<double>(d));
+    private static readonly Parser<char, LiteralExpression> NumberLit =
+        Tok(Real).Select<LiteralExpression>(d => new LiteralExpression<double>(d));
 
-    private static readonly Parser<char, Expression> StringLit =
+    private static readonly Parser<char, LiteralExpression> StringLit =
         Tok(Char('"').Then(AnyCharExcept('"').ManyString()).Before(Char('"')))
-        .Select<Expression>(s => new LiteralExpression<string>(s));
+        .Select<LiteralExpression>(s => new LiteralExpression<string>(s));
 
-    private static readonly Parser<char, Expression> BoolLit =
+    private static readonly Parser<char, LiteralExpression> BoolLit =
         Tok(String("true").ThenReturn(true).Or(String("false").ThenReturn(false)))
-        .Select<Expression>(b => new LiteralExpression<bool>(b));
+        .Select<LiteralExpression>(b => new LiteralExpression<bool>(b));
 
-    private static readonly Parser<char, Expression> Literal =
+    private static readonly Parser<char, LiteralExpression> Literal =
         NumberLit.Or(StringLit).Or(BoolLit);
 
     // --- Identifier ---
     private static readonly Parser<char, Expression> Identifier =
         Tok(Char('[').Then(AnyCharExcept(']').ManyString().Before(Char(']'))))
-        .Select<Expression>(parts => new IdentifierExpression(parts));
+            .Select<Expression>(parts => new IdentifierExpression(parts));
+    // --- Lists ---
+    private static readonly Parser<char, ImmutableArray<LiteralExpression>> ValueList =
+        Literal.Separated(Tok(",")).Select(e => e.ToImmutableArray());
+
+    private static readonly Parser<char, ImmutableArray<Expression>> ArgumentList =
+        Identifier.Or(Literal.Select<Expression>(l => l)).Separated(Tok(","))
+            .Select(e => e.ToImmutableArray());
+
+    private static readonly Parser<char, Expression> FunctionCallExpr =
+        Identifier.Then(Tok("(").Then(ArgumentList).Before(Tok(")")),
+            (name, args) => new FunctionCall((IdentifierExpression)name, args))
+            .Select<Expression>(fc => fc);
 
     // Forward declaration to allow recursive parentheses (e.g., (A + B))
     private static readonly Parser<char, Expression> Expr = Rec(() => ExpressionRule);
@@ -60,7 +73,7 @@ public static class RuleParser
     private static readonly Parser<char, Expression> Primary =
         Tok("(").Then(Expr).Before(Tok(")"))
         .Or(Identifier)
-        .Or(Literal);
+        .Or(Literal.Select<Expression>(l => l));
 
     // --- Precedence Level 2: Arithmetic ---
     private static readonly Parser<char, Expression> Multiplicative = ChainLeft(Primary,
@@ -82,8 +95,6 @@ public static class RuleParser
             .Or(Tok("بزرگتر از").Or(Tok(">")).ThenReturn(BinaryOperator.GreaterThan))
             .Or(Tok("کوچکتر از").Or(Tok("<")).ThenReturn(BinaryOperator.LessThan));
 
-    private static readonly Parser<char, ImmutableArray<Expression>> ValueList =
-        Literal.Separated(Tok(",")).Select(e => e.ToImmutableArray());
 
     // Matches the right-hand side of a comparison, an IN clause, or a BETWEEN clause
     private static readonly Parser<char, Func<Expression, Expression>> ComparisonTail =
@@ -110,7 +121,7 @@ public static class RuleParser
     private static readonly Parser<char, Expression> OrTerm = ChainLeft(AndTerm,
         Tok("یا").ThenReturn(BinaryOperator.Or));
 
-    private static Parser<char, Expression> ExpressionRule => OrTerm;
+    private static Parser<char, Expression> ExpressionRule => Try(FunctionCallExpr).Or(OrTerm);
 
     // --- Root Rule Parser ---
     public static readonly Parser<char, Rule> ParseRule =

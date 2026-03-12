@@ -17,36 +17,40 @@ For Version 1.0, we prioritize explicit delimiters for identifiers to avoid ambi
 
 ```ebnf
 /* Root */
-Rule            ::= FilterClause RequirementClause
+Rule              ::= FilterClause RequirementClause
 
 /* Structure */
-FilterClause    ::= "اگر" Expression
+FilterClause      ::= "اگر" Expression
 RequirementClause ::= "باید" Expression
 
 /* Expressions */
-Expression      ::= OrTerm
-OrTerm          ::= AndTerm { "یا" AndTerm }
-AndTerm         ::= NotTerm { "و" NotTerm }
-NotTerm         ::= Comparison ["نیست" | "نمیباشد"]
+Expression       ::= OrTerm | FunctionCall
+FunctionCall     ::= QuotedIdentifier "(" [ ArgumentList ] ")"
+OrTerm           ::= AndTerm { "یا" AndTerm }
+AndTerm          ::= NotTerm { "و" NotTerm }
+NotTerm          ::= Comparison ["نیست" | "نمیباشد"]
 
 /* Comparisons */
-Comparison      ::= Additive [ CompareOp Additive ]
+Comparison       ::= Additive [ CompareOp Additive ]
                   | Additive "در" "لیست" "(" ValueList ")"   /* IN Operator */
                   | Additive "بین" Literal "و" Literal      /* BETWEEN Operator */
 
 /* Arithmetic */
-Additive        ::= Multiplicative { ("+" | "-") Multiplicative }
-Multiplicative  ::= Primary { ("*" | "/" | "%") Primary }
+Additive         ::= Multiplicative { ("+" | "-") Multiplicative }
+Multiplicative   ::= Primary { ("*" | "/" | "%") Primary }
 
 /* Primitives */
-Primary         ::= "(" Expression ")"
+Primary          ::= "(" Expression ")"
                   | Identifier
                   | Literal
+QuotedIdentifier ::= "[" BareIdentifier "]"
+BareIdentifier   ::= IdentifierPart { "." IdentifierPart } /* e.g. Personnel.Age */
+ArgumentList     ::= Expression { "," Expression }
+ValueList     ::= Literal { "," Literal }
 
 /* Terminals */
-Identifier      ::= "[" QualifiedName "]"   /* e.g. [Personnel.Age] */
-Literal         ::= Number | StringLiteral | Boolean
-CompareOp       ::= "بزرگتر از" | "کوچکتر از" | "برابر با" | "مخالف" | "بزرگتر مساوی" | "کوچکتر مساوی" | ">" | "<" | "=" | "!="
+Literal          ::= Number | StringLiteral | Boolean
+CompareOp        ::= "بزرگتر از" | "کوچکتر از" | "برابر با" | "مخالف" | "بزرگتر مساوی" | "کوچکتر مساوی" | ">" | "<" | "=" | "!="
 ```
 
 **Noise Words:** The parser acts as a "lenient consumer," optionally skipping words like `است`, `باشد`, `مقدار`, `که` to allow natural phrasing.
@@ -168,6 +172,28 @@ but backends can be made to generate source code from the ast (available in `./M
     (([Approved] = 1) OR ([Description] <> ''))
     ```
   
+### Example 4 Function Calls
+* **Farsi Input:**
+    `اگر [Store.Status] برابر "Closed" نیست باید [CheckAction](1)`
+* **Ast Representation**
+    ```text
+  Rule
+    ├── Filter (اگر)
+    │   └── UnaryExpression (Not)
+    │       └── BinaryExpression (Equal)
+    │           ├── Identifier: [Store.Status]
+    │           └── Literal: "Closed"
+    └── Requirement (باید)
+        └── FunctionCall
+            ├── Identifier: [CheckAction]
+            └── Literal: 1
+    ```
+
+* **SQL Output:**
+    ```sql
+    NOT ([Store].[Status] != "Closed")
+    OR 1=[CheckAction](1)
+    ```
 ## The Parser
 
 The parser is developed using parser composition technique and [Pidgin](https://github.com/benjamin-hodgson/Pidgin) Library<br/>

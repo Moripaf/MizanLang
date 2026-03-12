@@ -54,6 +54,16 @@ public static class AstPrinter
                 Console.WriteLine($"Identifier: {id}");
                 break;
 
+            case FunctionCall fc:
+                Console.WriteLine("FunctionCall");
+                PrintNode(fc.Name, childIndent, false);
+                for(int i=0;i<fc.Arguments.Length-1;i++)
+                {
+                   PrintNode(fc.Arguments[i], childIndent, false);
+                }
+                if(fc.Arguments.Length>0)
+                    PrintNode(fc.Arguments[^1], childIndent, true);
+                break;
             case LiteralExpression lit:
                 string valStr = lit.Value is string s ? $"\"{s}\"" : (lit.Value?.ToString() ?? "null");
                 Console.WriteLine($"Literal: {valStr}");

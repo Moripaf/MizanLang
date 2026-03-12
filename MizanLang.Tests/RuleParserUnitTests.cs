@@ -96,4 +96,14 @@ public class RuleParserUnitTests
         Assert.Equal("Status", ((IdentifierExpression)innerEq.Left).Parts[1]);
         Assert.Equal("Store", ((IdentifierExpression)innerEq.Left).Parts[0]);
     }
+
+    [Fact]
+    public void Parse_FunctionCall()
+    {
+        string code = "اگر [Store.Status] برابر \"Closed\" نیست باید [CheckAction](1)";
+        var rule = RuleParser.Parse(code);
+        var fc = Assert.IsType<FunctionCall>(rule.Requirement);
+        Assert.Equal("CheckAction",fc.Name.Parts[0]);
+        Assert.Equal("1", fc.Arguments[0].ToString());
+    }
 }

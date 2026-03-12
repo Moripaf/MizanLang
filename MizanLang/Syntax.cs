@@ -58,10 +58,35 @@ public class UnaryExpression(UnaryOperator op, Expression operand) : Expression
     public override string ToString() => $"{Operand} {Operator.ToDecompiledString()}";
 }
 
-public class InListExpression(Expression target, ImmutableArray<Expression> values) : Expression
+public class FunctionCall(IdentifierExpression name, ImmutableArray<Expression> arguments) : Expression
+{
+   public IdentifierExpression Name { get; } = name;
+   public ImmutableArray<Expression> Arguments { get; } = arguments;
+   public override int CountChildren() => 1 + Arguments.Length;
+
+   public override void GetChildren(Span<Expression> childrenReceiver)
+   {
+       childrenReceiver[0] = Name;
+       for (int i = 0; i < Arguments.Length; i++)
+       {
+           childrenReceiver[i + 1] = Arguments[i];
+       }
+   }
+
+   public override Expression SetChildren(ReadOnlySpan<Expression> newChildren)
+   {
+       if (newChildren.Length == 0 || newChildren[0] is not IdentifierExpression)
+           throw new ArgumentException("First new child must be an identifier in newChildren");
+       var newName = newChildren[0];
+       ReadOnlySpan<Expression> newArguments = newChildren[1..];
+       return new FunctionCall((IdentifierExpression)newName, [..newArguments]);
+   }
+}
+
+public class InListExpression(Expression target, ImmutableArray<LiteralExpression> values) : Expression
 {
     public Expression Target { get; } = target;
-    public ImmutableArray<Expression> Values { get; } = values;
+    public ImmutableArray<LiteralExpression> Values { get; } = values;
 
     public override int CountChildren() => 1 + Values.Length;
 
@@ -77,7 +102,7 @@ public class InListExpression(Expression target, ImmutableArray<Expression> valu
     public override Expression SetChildren(ReadOnlySpan<Expression> newChildren)
     {
         var newTarget = newChildren[0];
-        var newValues = newChildren.Slice(1).ToArray().ToImmutableArray();
+        var newValues = newChildren.Slice(1).ToArray().Select(nc => (LiteralExpression)nc).ToImmutableArray();
         return new InListExpression(newTarget, newValues);
     }
 
@@ -117,14 +142,11 @@ public class IdentifierExpression(List<string> parts) : Expression
     public override string ToString() => $"[{string.Join('.', Parts)}]";
 }
 
-public class LiteralExpression<T>(T value) : Expression
+public class LiteralExpression<T>(T value) : LiteralExpression(value)
+where T: notnull
 {
     // Value can hold int, double, string, or bool natively
-    public T Value { get; } = value;
-
-    public override int CountChildren() => 0;
-    public override void GetChildren(Span<Expression> childrenReceiver) { }
-    public override Expression SetChildren(ReadOnlySpan<Expression> newChildren) => this;
+    public new T Value { get; } = value;
 
     public override string ToString() => Value switch
     {
