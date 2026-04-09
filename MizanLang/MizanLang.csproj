@@ -5,6 +5,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>MizanLang</RootNamespace>
+        <PackageId>MizanLang</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>Moripaf</Authors>
+        <Description>A Farsi DSL for expressing simple validation logic in a declarative manner</Description>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
