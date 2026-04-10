@@ -14,9 +14,9 @@ export function createDslEditor(domElement, initialValue = "", onChange = null) 
       lintGutter(),
       linter(clientLinter),
       // debounce is configured directly in CM's linter function config
-      linter(serverLinter, { delay: 400 }),
+      //linter(serverLinter, { delay: 400 }),
       EditorView.theme({
-        "&": { height: "100%", direction: "rtl", textAlign: "right", fontFamily: "Tahoma, Arial, sans-serif" },
+        "&": { height: "100%", direction: "rtl", textAlign: "right", fontFamily: "Tahoma, Arial, sans-serif", outerWidth: "50%", innerWidth: "50%" },
         ".cm-scroller": { overflow: "auto" }
       }, { dark: true }),
       EditorView.updateListener.of((update) => {
