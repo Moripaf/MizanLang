@@ -4,26 +4,26 @@
 
 Rule { FilterClause RequirementClause }
 
-FilterClause { kwAgar Expression }
-RequirementClause { kwBayad Expression }
+FilterClause { KwAgar Expression }
+RequirementClause { KwBayad Expression }
 
 Expression { OrTerm | FunctionCall }
 
 FunctionCall { QuotedIdentifier "(" ArgumentList? ")" }
 
-OrTerm { AndTerm (kwYa AndTerm)* }
-AndTerm { NotTerm (kwVa NotTerm)* }
-NotTerm { Comparison (kwNist)? }
+OrTerm { AndTerm (KwYa AndTerm)* }
+AndTerm { NotTerm (KwVa NotTerm)* }
+NotTerm { Comparison (KwNist)? }
 
 Comparison {
   Additive CompareOp Additive |
-  Additive kwDar kwList "(" ValueList ")" |
-  Additive kwBeyn Literal kwVa Literal |
+  Additive KwDar KwList "(" ValueList ")" |
+  Additive KwBeyn Literal KwVa Literal |
   Additive
 }
 
-Additive { Multiplicative ((opAdd | opSub) Multiplicative)* }
-Multiplicative { Primary ((opMul | opDiv | opMod) Primary)* }
+Additive { Multiplicative ((OpAdd | OpSub) Multiplicative)* }
+Multiplicative { Primary ((OpMul | OpDiv | OpMod) Primary)* }
 
 Primary { "(" Expression ")" | QuotedIdentifier | Literal }
 
@@ -44,27 +44,27 @@ Literal { Number | String | Boolean }
 
   CompareOp { "بزرگتر از" | "کوچکتر از" | "برابر با" | "مخالف" | "بزرگتر مساوی" | "کوچکتر مساوی" | ">" | "<" | "=" | "!=" }
 
-  opAdd { "+" }
-  opSub { "-" }
-  opMul { "*" }
-  opDiv { "/" }
-  opMod { "%" }
+  OpAdd { "+" }
+  OpSub { "-" }
+  OpMul { "*" }
+  OpDiv { "/" }
+  OpMod { "%" }
 
-  kwAgar { "اگر" }
-  kwBayad { "باید" }
-  kwYa { "یا" }
-  kwVa { "و" }
-  kwNist { "نیست" | "نمیباشد" }
-  kwDar { "در" }
-  kwList { "لیست" }
-  kwBeyn { "بین" }
+  KwAgar { "اگر" }
+  KwBayad { "باید" }
+  KwYa { "یا" }
+  KwVa { "و" }
+  KwNist { "نیست" | "نمیباشد" }
+  KwDar { "در" }
+  KwList { "لیست" }
+  KwBeyn { "بین" }
 
   Noise { "است" | "باشد" | "مقدار" | "که" }
 
   "(" ")" "[" "]" "," "."
   @precedence { 
     Noise, 
-    kwAgar, kwBayad, kwYa, kwVa, kwNist, kwDar, kwList, kwBeyn, 
+    KwAgar, KwBayad, KwYa, KwVa, KwNist, KwDar, KwList, KwBeyn, 
     Boolean, 
     CompareOp, 
     IdentifierPart 

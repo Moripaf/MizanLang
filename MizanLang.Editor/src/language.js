@@ -1,19 +1,20 @@
-import { LRLanguage, LanguageSupport } from "@codemirror/language";
+import { LRLanguage, LanguageSupport, HighlightStyle } from "@codemirror/language";
 import { styleTags, tags as t } from "@lezer/highlight";
+import { completeFromList } from "@codemirror/autocomplete"
 import { parser } from "./parser.js";
 
 // Add syntax highlighting via styleTags
-export const dslParser = parser.configure({
+export const mizanParser = parser.configure({
   props: [
     styleTags({
-      "kwAgar kwBayad kwYa kwVa kwNist kwDar kwList kwBeyn": t.keyword,
-      "Noise": t.modifier,
+      "KwAgar KwBayad KwYa KwVa KwNist KwDar KwList KwBeyn": t.keyword,
+      "Noise": t.comment,
       "BareIdentifier": t.variableName,
       "QuotedIdentifier": t.special(t.variableName),
       "String": t.string,
       "Number": t.number,
       "Boolean": t.bool,
-      "CompareOp opAdd opSub opMul opDiv opMod": t.operator,
+      "CompareOp OpAdd OpSub OpMul OpDiv OpMod": t.operator,
       "Comment": t.lineComment,
       "( ) [ ]": t.paren,
       ", .": t.punctuation
@@ -21,13 +22,17 @@ export const dslParser = parser.configure({
   ]
 });
 
-export const dslLanguage = LRLanguage.define({
-  parser: dslParser,
+export const mizanLanguage = LRLanguage.define({
+  parser: mizanParser,
   languageData: {
     commentTokens: { line: "//", block: { open: "/*", close: "*/" } }
   }
 });
+const mizanHighlightStyle = HighlightStyle.define([
+  { tag: t.keyword, color: "#fff" },
+  { tag: t.comment, color: "#f5d", fontStyle: "italic" }
+])
 
-export function dsl() {
-  return new LanguageSupport(dslLanguage);
+export function mizan() {
+  return new LanguageSupport(mizanLanguage);
 }

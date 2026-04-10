@@ -1,7 +1,7 @@
 import { EditorView, basicSetup } from "codemirror";
 import { EditorState } from "@codemirror/state";
 import { linter, lintGutter } from "@codemirror/lint";
-import { dsl } from "./language.js";
+import { mizan } from "./language.js";
 import { clientLinter } from "./lint.js";
 import { serverLinter } from "./apiLint.js";
 
@@ -10,13 +10,13 @@ export function createDslEditor(domElement, initialValue = "", onChange = null) 
     doc: initialValue,
     extensions: [
       basicSetup,
-      dsl(),
+      mizan(),
       lintGutter(),
       linter(clientLinter),
       // debounce is configured directly in CM's linter function config
       //linter(serverLinter, { delay: 400 }),
       EditorView.theme({
-        "&": { height: "100%", direction: "rtl", textAlign: "right", fontFamily: "Tahoma, Arial, sans-serif", outerWidth: "50%", innerWidth: "50%" },
+        "&": { height: "100%", direction: "rtl", textAlign: "right", fontFamily: "Tahoma, Arial, sans-serif" },
         ".cm-scroller": { overflow: "auto" }
       }, { dark: true }),
       EditorView.updateListener.of((update) => {
