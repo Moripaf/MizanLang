@@ -1,29 +1,40 @@
 import { EditorView, basicSetup } from "codemirror";
 import { EditorState } from "@codemirror/state";
-import { linter, lintGutter } from "@codemirror/lint";
+import { linter } from "@codemirror/lint";
 import { mizan } from "./language.js";
 import { clientLinter } from "./lint.js";
 import { serverLinter } from "./apiLint.js";
+import { autocompletion } from "@codemirror/autocomplete"; // <--- Add this
+import { mizanAutocomplete } from "./autocomplete.js";
+import { getEditorTheme } from "./theme.js";
 
-export function createDslEditor(domElement, initialValue = "", onChange = null) {
+/**
+ * @param {Object} options 
+ * @param {*} options.domElement 
+ * @param {string} [options.initialValue=""] 
+ * @param {(string) => void} [options.onChange=null] 
+ * @param {boolean} [options.isLightMode=true] 
+ * @param {Array<Object>} [options.additionalExtentions] additional code mirror Extentions (linters, theme overrides)
+ */
+export function createMizanEditor({ domElement, initialValue = "",
+  onChange = null, isLightMode = true,
+  additionalExtentions = [], }) {
   const state = EditorState.create({
     doc: initialValue,
     extensions: [
       basicSetup,
       mizan(),
-      lintGutter(),
+      autocompletion({ override: [mizanAutocomplete] }),
       linter(clientLinter),
       // debounce is configured directly in CM's linter function config
       //linter(serverLinter, { delay: 400 }),
-      EditorView.theme({
-        "&": { height: "100%", direction: "rtl", textAlign: "right", fontFamily: "Tahoma, Arial, sans-serif" },
-        ".cm-scroller": { overflow: "auto" }
-      }, { dark: true }),
+      getEditorTheme(isLightMode),
       EditorView.updateListener.of((update) => {
         if (update.docChanged && onChange) {
           onChange(update.state.doc.toString());
         }
-      })
+      }),
+      additionalExtentions
     ]
   });
 
