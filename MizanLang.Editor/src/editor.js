@@ -10,10 +10,10 @@ import { getEditorTheme } from "./theme.js";
 
 /**
  * @param {Object} options 
- * @param {*} options.domElement 
- * @param {string} [options.initialValue=""] 
- * @param {(string) => void} [options.onChange=null] 
- * @param {boolean} [options.isLightMode=true] 
+ * @param {*} options.domElement the root element that the editor will be attached to
+ * @param {string} [options.initialValue=""] initial code displayed in the text box
+ * @param {(string) => void} [options.onChange=null] onChange event handler
+ * @param {boolean} [options.isLightMode=true] use light or dark theme
  * @param {Array<Object>} [options.additionalExtentions] additional code mirror Extentions (linters, theme overrides)
  */
 export function createMizanEditor({ domElement, initialValue = "",
